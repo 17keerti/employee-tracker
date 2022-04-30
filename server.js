@@ -221,4 +221,30 @@ function removeDepartment() {
   });
 }
 
+function removeEmployee() {
+  const sql = `SELECT id,first_name, last_name FROM employee;`
+  db.query(sql, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    console.table(result);
+    inquirer.prompt([{
+      name: 'employee',
+      message: "Which employee do you want to delete?",
+  }]).then(function(answer) {
+    const sql = `DELETE FROM employee where id= ?`
+    const id = answer.employee;
+    db.query(sql, id, (err, result) => {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      viewAllEmployees();
+      userPrompts();
+    })
+  })
+  });
+}
+
 userPrompts();
