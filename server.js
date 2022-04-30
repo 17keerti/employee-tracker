@@ -127,6 +127,41 @@ function viewByDepartment() {
     });
 }
 
+function viewByManager() {
+  const sql = `SELECT employee.first_name, employee.last_name, employee.manager_id 
+  FROM employee;`
+  db.query(sql, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    console.log("Showing Employees By Manager \n");
+    console.table(result);
+    userPrompts();
+    });
+}
+
+function addDepartment() {
+  inquirer.prompt([
+    {
+      type: 'input', 
+      name: 'addDept',
+      message: "What department do you want to add?"
+    }
+]).then(function(answer) {
+  const sql = `INSERT into department(name) VALUES (?)`;
+  const dept = answer.addDept;
+  db.query(sql, dept, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    viewAllDepartments();
+    userPrompts();
+  })
+});
+}
+
 function viewAllRoles() {
   const sql = `SELECT role.id, role.title, role.salary, department.name AS department
   From role
@@ -155,19 +190,6 @@ function viewAllDepartments() {
     });
 }
 
-function viewByManager() {
-  const sql = `SELECT employee.first_name, employee.last_name, employee.manager_id 
-  FROM employee;`
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-      return;
-    }
-    console.log("Showing Employees By Manager \n");
-    console.table(result);
-    userPrompts();
-    });
-}
 
 function removeRole() {
   const sql = `SELECT * FROM role;`
@@ -245,6 +267,11 @@ function removeEmployee() {
     })
   })
   });
+}
+
+
+function quit() {
+  db.end();
 }
 
 userPrompts();
