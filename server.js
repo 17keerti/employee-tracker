@@ -1,12 +1,5 @@
-const express = require('express');
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 const db = mysql.createConnection(
   {
@@ -37,7 +30,7 @@ function userOptions() {
                       "Remove Department", 
                       "Quit"]
 
-  }]).then(function(answers) {
+  }]).then(function(answer) {
 
     switch (answer.userChoices){
     case "View All Employees":
@@ -102,10 +95,20 @@ function userOptions() {
 
 userOptions();
 
-app.use((req, res) => {
-  res.status(404).end();
-});
+function viewAllEmployees() {
+  const sql =`SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, employee.manager_id, department.name
+  FROM employee
+  JOIN role ON employee.role_id = role.id 
+  JOIN department ON role.department_id = department.id;`
+  db.query(sql, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+   console.log(result);
+    });
+}
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+function viewByDepartment() {
+  const sql = ``
+}
