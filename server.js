@@ -19,7 +19,8 @@ function userOptions() {
             choices: ["View All Employees", 
                       "View All Employees By Department", 
                       "View All Employees By Manager", 
-                      "Add Emplyee", "Remove Employee", 
+                      "Add Emplyee", 
+                      "Remove Employee", 
                       "Update Employee Role", 
                       "Update Employee Manager", 
                       "View All Roles", 
@@ -125,6 +126,17 @@ function viewAllRoles() {
   const sql = `SELECT role.id, role.title, role.salary, department.name AS department
   From role
   LEFT JOIN department ON role.department_id = department.id; `
+  db.query(sql, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+   console.log(result);
+    });
+}
+
+function viewAllDepartments() {
+  const sql = `SELECT * FROM department;`
   db.query(sql, (err, result) => {
     if (err) {
       res.status(400).json({ error: err.message });
