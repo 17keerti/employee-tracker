@@ -1,5 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const cTable = require('console.table');
 
 const db = mysql.createConnection(
   {
@@ -104,7 +105,9 @@ function viewAllEmployees() {
       res.status(400).json({ error: err.message });
       return;
     }
-   console.log(result);
+   console.log("Showing ALL Employees \n");
+   console.table(result);
+   userOptions();
     });
 }
 
@@ -118,7 +121,9 @@ function viewByDepartment() {
       res.status(400).json({ error: err.message });
       return;
     }
-   console.log(result);
+    console.log("Showing Employees By Department \n");
+    console.table(result);
+    userOptions();
     });
 }
 
@@ -131,7 +136,9 @@ function viewAllRoles() {
       res.status(400).json({ error: err.message });
       return;
     }
-   console.log(result);
+    console.log("Showing ALL Roles \n");
+    console.table(result);
+    userOptions();
     });
 }
 
@@ -142,7 +149,9 @@ function viewAllDepartments() {
       res.status(400).json({ error: err.message });
       return;
     }
-   console.log(result);
+    console.log("Showing ALL Departments \n");
+    console.table(result);
+    userOptions();
     });
 }
 
