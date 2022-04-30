@@ -102,7 +102,7 @@ function viewAllEmployees() {
   JOIN department ON role.department_id = department.id;`
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
    console.log("Showing ALL Employees \n");
@@ -118,7 +118,7 @@ function viewByDepartment() {
   LEFT JOIN department ON role.department_id = department.id;`
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     console.log("Showing Employees By Department \n");
@@ -132,7 +132,7 @@ function viewByManager() {
   FROM employee;`
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     console.log("Showing Employees By Manager \n");
@@ -153,10 +153,36 @@ function addDepartment() {
   const dept = answer.addDept;
   db.query(sql, dept, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     viewAllDepartments();
+    userPrompts();
+  })
+});
+}
+
+function addRole() {
+  inquirer.prompt([
+    {
+      type: 'input', 
+      name: 'addRole',
+      message: "What role do you want to add?"
+    },
+    {
+      type: 'input', 
+      name: 'salary',
+      message: "What is the salary of this role?",
+    }
+]).then(function(answer) {
+  const sql = `INSERT INTO role(title, salary) VALUES (?,?)`;
+  const role = [answer.addRole, answer.salary];
+  db.query(sql, role, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    viewAllRoles();
     userPrompts();
   })
 });
@@ -168,7 +194,7 @@ function viewAllRoles() {
   LEFT JOIN department ON role.department_id = department.id; `
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     console.log("Showing ALL Roles \n");
@@ -181,7 +207,7 @@ function viewAllDepartments() {
   const sql = `SELECT * FROM department;`
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     console.log("Showing ALL Departments \n");
@@ -195,7 +221,7 @@ function removeRole() {
   const sql = `SELECT * FROM role;`
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     console.table(result);
@@ -207,7 +233,7 @@ function removeRole() {
       const id = answer.role;
       db.query(sql, id, (err, result) => {
         if (err) {
-          res.status(400).json({ error: err.message });
+          console.log(err);
           return;
         }
         viewAllRoles();
@@ -221,7 +247,7 @@ function removeDepartment() {
   const sql = `SELECT * FROM department;`
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     console.table(result);
@@ -233,7 +259,7 @@ function removeDepartment() {
     const id = answer.department;
     db.query(sql, id, (err, result) => {
       if (err) {
-        res.status(400).json({ error: err.message });
+        console.log(err);
         return;
       }
       viewAllDepartments();
@@ -247,7 +273,7 @@ function removeEmployee() {
   const sql = `SELECT id,first_name, last_name FROM employee;`
   db.query(sql, (err, result) => {
     if (err) {
-      res.status(400).json({ error: err.message });
+      console.log(err);
       return;
     }
     console.table(result);
@@ -259,7 +285,7 @@ function removeEmployee() {
     const id = answer.employee;
     db.query(sql, id, (err, result) => {
       if (err) {
-        res.status(400).json({ error: err.message });
+        console.log(err);
         return;
       }
       viewAllEmployees();
