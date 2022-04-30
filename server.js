@@ -12,7 +12,7 @@ const db = mysql.createConnection(
   console.log(`Connected to the employee_db database.`)
 );
 
-function userOptions() {
+function userPrompts() {
   inquirer.prompt([{
             type: "list",
             name: "userChoices",
@@ -107,7 +107,7 @@ function viewAllEmployees() {
     }
    console.log("Showing ALL Employees \n");
    console.table(result);
-   userOptions();
+   userPrompts();
     });
 }
 
@@ -123,7 +123,7 @@ function viewByDepartment() {
     }
     console.log("Showing Employees By Department \n");
     console.table(result);
-    userOptions();
+    userPrompts();
     });
 }
 
@@ -138,7 +138,7 @@ function viewAllRoles() {
     }
     console.log("Showing ALL Roles \n");
     console.table(result);
-    userOptions();
+    userPrompts();
     });
 }
 
@@ -151,9 +151,50 @@ function viewAllDepartments() {
     }
     console.log("Showing ALL Departments \n");
     console.table(result);
-    userOptions();
+    userPrompts();
+    });
+}
+
+function viewByManager() {
+  const sql = `SELECT employee.first_name, employee.last_name, employee.manager_id 
+  FROM employee;`
+  db.query(sql, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    console.log("Showing Employees By Manager \n");
+    console.table(result);
+    userPrompts();
+    });
+}
+
+function removeRole() {
+  const sql = `SELECT * FROM role;`
+  db.query(sql, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    console.log("Showing Employees By Manager \n");
+    console.table(result);
+    inquirer.prompt([{
+        name: 'role',
+        message: "What role do you want to delete?",
+    }]).then(function(answer) {
+      const sql = `DELETE FROM role where id= ?`
+      const id = answer.role;
+      db.query(sql, id, (err, result) => {
+        if (err) {
+          res.status(400).json({ error: err.message });
+          return;
+        }
+        viewAllRoles();
+        userPrompts();
+      })
+    })
     });
 }
 
 
-userOptions();
+userPrompts();
