@@ -176,7 +176,6 @@ function removeRole() {
       res.status(400).json({ error: err.message });
       return;
     }
-    console.log("Showing Employees By Manager \n");
     console.table(result);
     inquirer.prompt([{
         name: 'role',
@@ -196,5 +195,30 @@ function removeRole() {
     });
 }
 
+function removeDepartment() {
+  const sql = `SELECT * FROM department;`
+  db.query(sql, (err, result) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    console.table(result);
+    inquirer.prompt([{
+      name: 'department',
+      message: "What department do you want to delete?",
+  }]).then(function(answer) {
+    const sql = `DELETE FROM department where id= ?`
+    const id = answer.department;
+    db.query(sql, id, (err, result) => {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      viewAllDepartments();
+      userPrompts();
+    })
+  })
+  });
+}
 
 userPrompts();
