@@ -20,7 +20,7 @@ function userPrompts() {
             choices: ["View All Employees", 
                       "View All Employees By Department", 
                       "View All Employees By Manager", 
-                      "Add Emplyee", 
+                      "Add Employee", 
                       "Remove Employee", 
                       "Update Employee Role", 
                       "Update Employee Manager", 
@@ -47,20 +47,20 @@ function userPrompts() {
       viewByManager();
       break;
 
-    case "Add Emplyee":
+    case "Add Employee":
       addEmployee();
       break;
 
     case "Remove Employee":
-      removeEmployee();
+      removeEmployee(); 
       break;
       
     case "Update Employee Role":
-      updateRole();
+      updateRole(); //1
       break;
       
     case "Update Employee Manager":
-      updateManager();
+      updateManager(); //2
       break;
 
     case "View All Roles":
@@ -95,11 +95,20 @@ function userPrompts() {
   })
 }
 
+
 function viewAllEmployees() {
-  const sql =`SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, employee.manager_id, department.name
-  FROM employee
-  JOIN role ON employee.role_id = role.id 
-  JOIN department ON role.department_id = department.id;`
+  const sql =`SELECT employee.id, 
+                     employee.first_name, 
+                     employee.last_name, 
+                     role.title, 
+                     role.salary,
+                     department.name,
+                     CONCAT (manager.first_name, " ", manager.last_name) AS manager
+              FROM employee
+                     JOIN role ON employee.role_id = role.id 
+                     JOIN department ON role.department_id = department.id
+                     LEFT JOIN employee manager ON employee.manager_id = manager.id
+                     ORDER BY id;`
   db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
@@ -111,11 +120,14 @@ function viewAllEmployees() {
     });
 }
 
+
 function viewByDepartment() {
-  const sql = `SELECT employee.first_name, employee.last_name, department.name AS Deparment_Name
-  From employee
-  LEFT JOIN role ON employee.role_id = role.id 
-  LEFT JOIN department ON role.department_id = department.id;`
+  const sql = `SELECT employee.first_name, 
+                      employee.last_name, 
+                      department.name AS Deparment_Name
+               From employee
+                      LEFT JOIN role ON employee.role_id = role.id 
+                      LEFT JOIN department ON role.department_id = department.id;`
   db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
@@ -127,9 +139,13 @@ function viewByDepartment() {
     });
 }
 
+
 function viewByManager() {
-  const sql = `SELECT employee.first_name, employee.last_name, employee.manager_id 
-  FROM employee;`
+  const sql = `SELECT employee.first_name, 
+                      employee.last_name, 
+                      CONCAT (manager.first_name, " ", manager.last_name) AS manager
+               FROM employee
+                      JOIN employee manager ON employee.manager_id = manager.id;`
   db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
@@ -141,26 +157,93 @@ function viewByManager() {
     });
 }
 
-function addDepartment() {
+
+function addEmployee() {
   inquirer.prompt([
     {
-      type: 'input', 
-      name: 'addDept',
-      message: "What department do you want to add?"
+      type: 'input',
+      name: 'firstName',
+      message: 'What is the first name of employee ?'
+    },
+    {
+      type: 'input',
+      name: 'lastName',
+      message: 'What is the last name of employee ?'
     }
-]).then(function(answer) {
-  const sql = `INSERT into department(name) VALUES (?)`;
-  const dept = answer.addDept;
-  db.query(sql, dept, (err, result) => {
+]).then(function(answers) {
+  const param = [answers.firstName, answers.lastName];
+    inquirer.prompt([
+      {
+        type: 'input',
+        name: 'role',
+        message: "What is the employee's role ?"
+      },
+      {
+        type: 'input',
+        name: 'manager',
+        message: "Who is employee's manager ?"
+      }
+    ]).then(function(answer) {
+      const add = [answer.role, answer.manager];
+      param.push(add);
+      const sql =  `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?)`;
+      db.query(sql, param, (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log("Successfully added!");
+        viewAllEmployees();
+    })
+  })
+})
+}
+
+
+function removeEmployee() {
+  const sql = `SELECT id,first_name, last_name FROM employee;`
+  db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
       return;
     }
-    viewAllDepartments();
-    userPrompts();
+    console.table(result);
+    inquirer.prompt([{
+      name: 'employee',
+      message: "Which employee do you want to delete?",
+  }]).then(function(answer) {
+    const sql = `DELETE FROM employee where id= ?`
+    const param = answer.employee;
+    db.query(sql, id, (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      viewAllEmployees();
+    })
   })
-});
+  });
 }
+
+
+function viewAllRoles() {
+  const sql = `SELECT role.id,
+                      role.title,
+                      role.salary,
+                      department.name AS department
+               From role
+                      LEFT JOIN department ON role.department_id = department.id; `
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log("Showing ALL Roles \n");
+    console.table(result);
+    userPrompts();
+    });
+}
+
 
 function addRole() {
   inquirer.prompt([
@@ -176,44 +259,15 @@ function addRole() {
     }
 ]).then(function(answer) {
   const sql = `INSERT INTO role(title, salary) VALUES (?,?)`;
-  const role = [answer.addRole, answer.salary];
-  db.query(sql, role, (err, result) => {
+  const param = [answer.addRole, answer.salary];
+  db.query(sql, param, (err, result) => {
     if (err) {
       console.log(err);
       return;
     }
     viewAllRoles();
-    userPrompts();
   })
 });
-}
-
-function viewAllRoles() {
-  const sql = `SELECT role.id, role.title, role.salary, department.name AS department
-  From role
-  LEFT JOIN department ON role.department_id = department.id; `
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log("Showing ALL Roles \n");
-    console.table(result);
-    userPrompts();
-    });
-}
-
-function viewAllDepartments() {
-  const sql = `SELECT * FROM department;`
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log("Showing ALL Departments \n");
-    console.table(result);
-    userPrompts();
-    });
 }
 
 
@@ -237,15 +291,50 @@ function removeRole() {
           return;
         }
         viewAllRoles();
-        userPrompts();
       })
     })
     });
 }
 
-function removeDepartment() {
+
+function viewAllDepartments() {
   const sql = `SELECT * FROM department;`
   db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log("Showing ALL Departments \n");
+    console.table(result);
+    userPrompts();
+    });
+}
+
+
+function addDepartment() {
+  inquirer.prompt([
+    {
+      type: 'input', 
+      name: 'addDept',
+      message: "What department do you want to add?"
+    }
+]).then(function(answer) {
+  const sql = `INSERT into department(name) VALUES (?)`;
+  const dept = answer.addDept;
+  db.query(sql, dept, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    viewAllDepartments();
+  })
+});
+}
+
+
+function removeDepartment() {
+  const sql = `SELECT * FROM department;`
+  db.promise().query(sql, (err, result) => {
     if (err) {
       console.log(err);
       return;
@@ -262,38 +351,16 @@ function removeDepartment() {
         console.log(err);
         return;
       }
+      console.log("Succesfully deleted!");
       viewAllDepartments();
-      userPrompts();
     })
   })
   });
 }
 
-function removeEmployee() {
-  const sql = `SELECT id,first_name, last_name FROM employee;`
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.table(result);
-    inquirer.prompt([{
-      name: 'employee',
-      message: "Which employee do you want to delete?",
-  }]).then(function(answer) {
-    const sql = `DELETE FROM employee where id= ?`
-    const id = answer.employee;
-    db.query(sql, id, (err, result) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      viewAllEmployees();
-      userPrompts();
-    })
-  })
-  });
-}
+
+
+
 
 
 function quit() {
