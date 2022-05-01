@@ -60,7 +60,7 @@ function userPrompts() {
       break;
       
     case "Update Employee Manager":
-      updateManager(); //2
+      updateManager();
       break;
 
     case "View All Roles":
@@ -224,6 +224,46 @@ function removeEmployee() {
   })
   });
 }
+
+
+function updateRole() {
+  const sql = `SELECT employee.id, 
+                      employee.first_name, 
+                      employee.last_name, 
+                      role.title AS role
+               FROM employee
+                      JOIN role ON employee.role_id = role.id`
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    inquirer.prompt([
+      {
+        type: 'input',
+        name: 'employee',
+        message: 'Which employee has a new role ?'
+      },
+      {
+        type: 'input',
+        name: 'role',
+        message: 'What is their new role ?'
+      }
+    ]).then(function(answers) {
+      const sql = 'UPDATE employee SET role_id= ? where id = ?';
+      const param = [answers.role, answers.employee];
+      db.query(sql, param, (err,result) => {
+        if (err){
+          console.log(err);
+          return;
+        }
+        console.log("SUccessfully Updated!");
+        viewAllEmployees();
+      })
+    })
+  })
+}
+
 
 function updateManager() {
   db.query('SELECT employee.id, employee.first_name, employee.last_name  FROM employee', (err, result) => {
