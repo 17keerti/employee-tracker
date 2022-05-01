@@ -225,6 +225,39 @@ function removeEmployee() {
   });
 }
 
+function updateManager() {
+  db.query('SELECT employee.id, employee.first_name, employee.last_name FROM employee', (err, result) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.table(result);
+ 
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'employee',
+      message: 'Which employee has a new manager?'
+    },
+    {
+      type: 'input',
+      name: 'manager',
+      message: 'Who is their manager?'
+    }
+  ]).then(function(answers) {
+    const param = [answers.manager, answers.employee];
+    const sql = 'UPDATE employee SET manager_id = ? where id = ?';
+    db.query(sql, param, (err, result) => {
+      if (err){
+        console.log(err);
+      }
+      console.log("SUccesfully updated!");
+      viewByManager();
+    })
+  })
+})
+}
+
 
 function viewAllRoles() {
   const sql = `SELECT role.id,
