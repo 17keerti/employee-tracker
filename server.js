@@ -56,7 +56,7 @@ function userPrompts() {
       break;
       
     case "Update Employee Role":
-      updateRole(); //1
+      updateRole();
       break;
       
     case "Update Employee Manager":
@@ -102,7 +102,7 @@ function viewAllEmployees() {
                      employee.last_name, 
                      role.title, 
                      role.salary,
-                     department.name,
+                     department.name AS department ,
                      CONCAT (manager.first_name, " ", manager.last_name) AS manager
               FROM employee
                      JOIN role ON employee.role_id = role.id 
@@ -176,12 +176,12 @@ function addEmployee() {
       {
         type: 'input',
         name: 'role',
-        message: "What is the employee's role ?"
+        message: "What is the employee's role ?"  // list to user
       },
       {
         type: 'input',
         name: 'manager',
-        message: "Who is employee's manager ?"
+        message: "Who is employee's manager ?" // give list of manager
       }
     ]).then(function(answer) {
       const add = [answer.role, answer.manager];
@@ -214,7 +214,7 @@ function removeEmployee() {
   }]).then(function(answer) {
     const sql = `DELETE FROM employee where id= ?`
     const param = answer.employee;
-    db.query(sql, id, (err, result) => {
+    db.query(sql, param, (err, result) => {
       if (err) {
         console.log(err);
         return;
@@ -242,12 +242,12 @@ function updateRole() {
       {
         type: 'input',
         name: 'employee',
-        message: 'Which employee has a new role ?'
+        message: 'Which employee has a new role ?' // give list of employee
       },
       {
         type: 'input',
         name: 'role',
-        message: 'What is their new role ?'
+        message: 'What is their new role ?' // give list
       }
     ]).then(function(answers) {
       const sql = 'UPDATE employee SET role_id= ? where id = ?';
@@ -277,7 +277,7 @@ function updateManager() {
     {
       type: 'input',
       name: 'employee',
-      message: 'Which employee has a new manager?'
+      message: 'Which employee has a new manager?' // give list
     },
     {
       type: 'input',
@@ -323,22 +323,47 @@ function addRole() {
     {
       type: 'input', 
       name: 'addRole',
-      message: "What role do you want to add?"
+      message: "What is the name of the role?"
     },
     {
       type: 'input', 
       name: 'salary',
-      message: "What is the salary of this role?",
+      message: "What is the salary of this role?"
     }
-]).then(function(answer) {
-  const sql = `INSERT INTO role(title, salary) VALUES (?,?)`;
-  const param = [answer.addRole, answer.salary];
-  db.query(sql, param, (err, result) => {
+]).then(function(answers) {
+  const param = [answers.addRole, answers.salary];
+  const sql = `SELECT id,name FROM department`;
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    console.log(result); 
+    var deptNames = [];
+    for (var i=0; i<result.length; i++) {
+      deptNames.push(result[i].name);
+    }
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'dept',
+      message: 'Select the department:',
+      choices: deptNames
+    }
+  ]).then(function(answer) {
+    var indexOfSelectedDept = deptNames.findIndex((element) => element === answer.dept);
+    var idOfDeptName = result[indexOfSelectedDept].id;
+    const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;   
+    const add = idOfDeptName;
+    param.push(add);
+
+    db.query(sql, param, (err, result) => {
     if (err) {
       console.log(err);
       return;
     }
     viewAllRoles();
+  })
+  })
   })
 });
 }
@@ -389,7 +414,7 @@ function addDepartment() {
     {
       type: 'input', 
       name: 'addDept',
-      message: "What department do you want to add?"
+      message: "What is the name of the department?"
     }
 ]).then(function(answer) {
   const sql = `INSERT into department(name) VALUES (?)`;
@@ -399,6 +424,7 @@ function addDepartment() {
       console.log(err);
       return;
     }
+    console.log("Succesfully added Department!");
     viewAllDepartments();
   })
 });
@@ -407,7 +433,7 @@ function addDepartment() {
 
 function removeDepartment() {
   const sql = `SELECT * FROM department;`
-  db.promise().query(sql, (err, result) => {
+  db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
       return;
@@ -430,10 +456,6 @@ function removeDepartment() {
   })
   });
 }
-
-
-
-
 
 
 function quit() {
