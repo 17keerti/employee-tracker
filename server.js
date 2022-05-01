@@ -226,7 +226,7 @@ function removeEmployee() {
 }
 
 function updateManager() {
-  db.query('SELECT employee.id, employee.first_name, employee.last_name FROM employee', (err, result) => {
+  db.query('SELECT employee.id, employee.first_name, employee.last_name  FROM employee', (err, result) => {
     if (err) {
       console.log(err);
       return;
