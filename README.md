@@ -18,6 +18,10 @@ A command-line application to manage company's employee database using Node.js, 
 ## Video
 
 
+https://user-images.githubusercontent.com/102001384/166194737-1c723a71-af55-4d7d-bb64-c0ad431e5400.mp4
+
+
+
 
 
 ## Installation
