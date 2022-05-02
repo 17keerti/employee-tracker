@@ -305,8 +305,6 @@ function updateRole() {
           const indexOfSelectedRole = roleList.findIndex((element) => element === answer.role);
           // const idOfRole = result[indexOfSelectedRole].id;
           param.unshift(indexOfSelectedRole);
-          console.log("HERE");
-        console.log(param);
       const sql = 'UPDATE employee SET role_id= ? where id = ?';
       db.query(sql, param, (err,result) => {
         if (err){
@@ -324,26 +322,52 @@ function updateRole() {
 
 
 function updateManager() {
-  db.query('SELECT employee.id, employee.first_name, employee.last_name  FROM employee', (err, result) => {
+  const sql = 'SELECT * FROM employee';
+  const param = [];
+  db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
       return;
     }
-    console.table(result);
- 
+    const empList = [];
+    for (var i=0; i<result.length; i++) {
+      empList.push(result[i].first_name);
+    }
+
   inquirer.prompt([
     {
-      type: 'input',
+      type: 'list',
       name: 'employee',
-      message: 'Which employee has a new manager?' // give list
-    },
-    {
-      type: 'input',
-      name: 'manager',
-      message: 'Who is their manager?'
+      message: 'Which employee has a new manager?',
+      choices: empList
     }
-  ]).then(function(answers) {
-    const param = [answers.manager, answers.employee];
+  ]).then(function(answer) {
+        const indexOfSelectedEmp = empList.findIndex((element) => element === answer.employee);
+        const idOfEmp = result[indexOfSelectedEmp].id;
+        param.push(idOfEmp);
+
+        const sql = 'SELECT * FROM employee';
+        db.query(sql, (err,result) => {
+          if (err) {
+            console.log(err);
+          }
+        const managerList = [];
+        for (var i=0; i<result.length; i++) {
+          managerList.push(result[i].first_name);
+         }
+
+         inquirer.prompt([
+          {
+            type: 'list',
+            name: 'manager',
+            message: 'Who is their manager?',
+            choices: managerList
+          }
+         ]).then(function(answer) {
+          const indexOfSelectedMAnager = empList.findIndex((element) => element === answer.manager);
+          // const idOfEmp = result[indexOfSelectedEmp].id;
+          param.unshift(indexOfSelectedMAnager);
+         console.log(param);
     const sql = 'UPDATE employee SET manager_id = ? where id = ?';
     db.query(sql, param, (err, result) => {
       if (err){
@@ -353,6 +377,8 @@ function updateManager() {
       viewByManager();
     })
   })
+  })
+})
 })
 }
 
