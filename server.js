@@ -303,7 +303,6 @@ function updateRole() {
           }
         ]).then(function(answer) {
           const indexOfSelectedRole = roleList.findIndex((element) => element === answer.role);
-          // const idOfRole = result[indexOfSelectedRole].id;
           param.unshift(indexOfSelectedRole);
       const sql = 'UPDATE employee SET role_id= ? where id = ?';
       db.query(sql, param, (err,result) => {
@@ -312,7 +311,7 @@ function updateRole() {
           return;
         }
         console.log("SUccessfully Updated!");
-        viewAllEmployees();
+        userPrompts();
       })
     })
     })
@@ -365,20 +364,18 @@ function updateManager() {
           }
          ]).then(function(answer) {
           const indexOfSelectedMAnager = empList.findIndex((element) => element === answer.manager);
-          // const idOfEmp = result[indexOfSelectedEmp].id;
           param.unshift(indexOfSelectedMAnager);
-         console.log(param);
-    const sql = 'UPDATE employee SET manager_id = ? where id = ?';
-    db.query(sql, param, (err, result) => {
-      if (err){
-        console.log(err);
-      }
-      console.log("SUccesfully updated!");
-      viewByManager();
-    })
-  })
-  })
-})
+          const sql = 'UPDATE employee SET manager_id = ? where id = ?';
+          db.query(sql, param, (err, result) => {
+          if (err){
+            console.log(err);
+          }
+       console.log("SUccesfully updated!");
+        userPrompts();
+       })
+     })
+   })
+ })
 })
 }
 
