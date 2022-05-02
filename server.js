@@ -172,21 +172,52 @@ function addEmployee() {
     }
 ]).then(function(answers) {
   const param = [answers.firstName, answers.lastName];
+  const sql = 'SELECT id,title FROM role';
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    const roleTitle = [];
+    for (var i=0; i<result.length; i++) {
+      roleTitle.push(result[i].title);
+    }
+ 
+
     inquirer.prompt([
       {
-        type: 'input',
+        type: 'list',
         name: 'role',
-        message: "What is the employee's role ?"  // list to user
-      },
-      {
-        type: 'input',
-        name: 'manager',
-        message: "Who is employee's manager ?" // give list of manager
+        message: "What is the employee's role ?", 
+        choices: roleTitle
       }
     ]).then(function(answer) {
-      const add = [answer.role, answer.manager];
-      param.push(add);
-      const sql =  `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?)`;
+      const indexOfSelectedRole = roleTitle.findIndex((element) => element === answer.role);
+      const idOfRoleName = result[indexOfSelectedRole].id;
+      param.push(idOfRoleName);
+
+      const sql = 'SELECT * FROM employee';
+      db.query(sql, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        const manager = [];
+        for (var i=0; i<result.length; i++) {
+          manager.push(result[i].first_name);
+        }
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'manager',
+          message: "Who is employee's manager ?",
+          choices: manager
+        }
+      ]).then(function(answer) {
+        const indexOfSelectedManager = manager.findIndex((element) => element === answer.manager);
+        const idOfManager = result[indexOfSelectedManager].id;
+        param.push(idOfManager);
+      
+      const sql =  `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
       db.query(sql, param, (err, result) => {
         if (err) {
           console.log(err);
@@ -196,6 +227,9 @@ function addEmployee() {
         viewAllEmployees();
     })
   })
+})
+})
+})
 })
 }
 
@@ -227,31 +261,53 @@ function removeEmployee() {
 
 
 function updateRole() {
-  const sql = `SELECT employee.id, 
-                      employee.first_name, 
-                      employee.last_name, 
-                      role.title AS role
-               FROM employee
-                      JOIN role ON employee.role_id = role.id`
+  const sql = 'SELECT * FROM employee';
+  const param = [];
   db.query(sql, (err, result) => {
     if (err) {
       console.log(err);
       return;
     }
+    const empList = [];
+    for (var i=0; i<result.length; i++) {
+      empList.push(result[i].first_name);
+    }
+    
     inquirer.prompt([
       {
-        type: 'input',
+        type: 'list',
         name: 'employee',
-        message: 'Which employee has a new role ?' // give list of employee
-      },
-      {
-        type: 'input',
-        name: 'role',
-        message: 'What is their new role ?' // give list
+        message: 'Which employee has a new role ?',
+        choices: empList 
       }
-    ]).then(function(answers) {
+    ]).then(function(answer) {
+        const indexOfSelectedEmp = empList.findIndex((element) => element === answer.employee);
+        const idOfEmp = result[indexOfSelectedEmp].id;
+        param.push(idOfEmp);
+
+        const sql = 'SELECT title FROM role';
+        db.query(sql, (err,result) => {
+          if (err) {
+            console.log(err);
+          }
+        const roleList = [];
+        for (var i=0; i<result.length; i++) {
+        roleList.push(result[i].title);
+         }
+        inquirer.prompt([
+          {
+            type: 'list',
+            name: 'role',
+            message: 'What is their new role ?',
+            choices: roleList
+          }
+        ]).then(function(answer) {
+          const indexOfSelectedRole = roleList.findIndex((element) => element === answer.role);
+          // const idOfRole = result[indexOfSelectedRole].id;
+          param.unshift(indexOfSelectedRole);
+          console.log("HERE");
+        console.log(param);
       const sql = 'UPDATE employee SET role_id= ? where id = ?';
-      const param = [answers.role, answers.employee];
       db.query(sql, param, (err,result) => {
         if (err){
           console.log(err);
@@ -260,6 +316,8 @@ function updateRole() {
         console.log("SUccessfully Updated!");
         viewAllEmployees();
       })
+    })
+    })
     })
   })
 }
@@ -337,8 +395,7 @@ function addRole() {
     if (err) {
       console.log(err);
     }
-    console.log(result); 
-    var deptNames = [];
+    const deptNames = [];
     for (var i=0; i<result.length; i++) {
       deptNames.push(result[i].name);
     }
@@ -350,11 +407,10 @@ function addRole() {
       choices: deptNames
     }
   ]).then(function(answer) {
-    var indexOfSelectedDept = deptNames.findIndex((element) => element === answer.dept);
-    var idOfDeptName = result[indexOfSelectedDept].id;
+    const indexOfSelectedDept = deptNames.findIndex((element) => element === answer.dept);
+    const idOfDeptName = result[indexOfSelectedDept].id;
     const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;   
-    const add = idOfDeptName;
-    param.push(add);
+    param.push(idOfDeptName);
 
     db.query(sql, param, (err, result) => {
     if (err) {
