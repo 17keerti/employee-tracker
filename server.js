@@ -14,82 +14,82 @@ const db = mysql.createConnection(
 
 function userPrompts() {
   inquirer.prompt([{
-            type: "list",
-            name: "userChoices",
-            message: "What would you like to do ?",
-            choices: ["View All Employees", 
-                      "View All Employees By Department", 
-                      "View All Employees By Manager", 
-                      "Add Employee", 
-                      "Remove Employee", 
-                      "Update Employee Role", 
-                      "Update Employee Manager", 
-                      "View All Roles", 
-                      "Add Role", 
-                      "Remove Role", 
-                      "View All Departments", 
-                      "Add Department", 
-                      "Remove Department", 
-                      "Quit"]
+    type: "list",
+    name: "userChoices",
+    message: "What would you like to do ?",
+    choices: ["View All Employees",
+      "View All Employees By Department",
+      "View All Employees By Manager",
+      "Add Employee",
+      "Remove Employee",
+      "Update Employee Role",
+      "Update Employee Manager",
+      "View All Roles",
+      "Add Role",
+      "Remove Role",
+      "View All Departments",
+      "Add Department",
+      "Remove Department",
+      "Quit"]
 
-  }]).then(function(answer) {
+  }]).then(function (answer) {
 
-    switch (answer.userChoices){
-    case "View All Employees":
-      viewAllEmployees();
-      break;
+    switch (answer.userChoices) {
+      case "View All Employees":
+        viewAllEmployees();
+        break;
 
-    case "View All Employees By Department":
-      viewByDepartment();
-      break;
+      case "View All Employees By Department":
+        viewByDepartment();
+        break;
 
-    case "View All Employees By Manager":
-      viewByManager();
-      break;
+      case "View All Employees By Manager":
+        viewByManager();
+        break;
 
-    case "Add Employee":
-      addEmployee();
-      break;
+      case "Add Employee":
+        addEmployee();
+        break;
 
-    case "Remove Employee":
-      removeEmployee(); 
-      break;
-      
-    case "Update Employee Role":
-      updateRole();
-      break;
-      
-    case "Update Employee Manager":
-      updateManager();
-      break;
+      case "Remove Employee":
+        removeEmployee();
+        break;
 
-    case "View All Roles":
-      viewAllRoles();
-      break;
+      case "Update Employee Role":
+        updateRole();
+        break;
 
-    case "Add Role":
-      addRole();
-      break;
+      case "Update Employee Manager":
+        updateManager();
+        break;
 
-    case "Remove Role":
-      removeRole();
-      break;
+      case "View All Roles":
+        viewAllRoles();
+        break;
 
-    case "View All Departments":
-      viewAllDepartments();
-      break;
-      
-    case "Add Department":
-      addDepartment();
-      break;
-      
-    case "Remove Department":
-      removeDepartment();
-      break;
-      
-    case "Quit":
-      quit();
-      break; 
+      case "Add Role":
+        addRole();
+        break;
+
+      case "Remove Role":
+        removeRole();
+        break;
+
+      case "View All Departments":
+        viewAllDepartments();
+        break;
+
+      case "Add Department":
+        addDepartment();
+        break;
+
+      case "Remove Department":
+        removeDepartment();
+        break;
+
+      case "Quit":
+        quit();
+        break;
     }
 
   })
@@ -97,7 +97,7 @@ function userPrompts() {
 
 
 function viewAllEmployees() {
-  const sql =`SELECT employee.id, 
+  const sql = `SELECT employee.id, 
                      employee.first_name, 
                      employee.last_name, 
                      role.title, 
@@ -114,10 +114,10 @@ function viewAllEmployees() {
       console.log(err);
       return;
     }
-   console.log("Showing ALL Employees \n");
-   console.table(result);
-   userPrompts();
-    });
+    console.log("Showing ALL Employees \n");
+    console.table(result);
+    userPrompts();
+  });
 }
 
 
@@ -136,7 +136,7 @@ function viewByDepartment() {
     console.log("Showing Employees By Department \n");
     console.table(result);
     userPrompts();
-    });
+  });
 }
 
 
@@ -154,7 +154,7 @@ function viewByManager() {
     console.log("Showing Employees By Manager \n");
     console.table(result);
     userPrompts();
-    });
+  });
 }
 
 
@@ -170,67 +170,67 @@ function addEmployee() {
       name: 'lastName',
       message: 'What is the last name of employee ?'
     }
-]).then(function(answers) {
-  const param = [answers.firstName, answers.lastName];
-  const sql = 'SELECT id,title FROM role';
+  ]).then(function (answers) {
+    const param = [answers.firstName, answers.lastName];
+    const sql = 'SELECT id,title FROM role';
 
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    const roleTitle = [];
-    for (var i=0; i<result.length; i++) {
-      roleTitle.push(result[i].title);
-    }
- 
-
-    inquirer.prompt([
-      {
-        type: 'list',
-        name: 'role',
-        message: "What is the employee's role ?", 
-        choices: roleTitle
+    db.query(sql, (err, result) => {
+      if (err) {
+        console.log(err);
       }
-    ]).then(function(answer) {
-      const indexOfSelectedRole = roleTitle.findIndex((element) => element === answer.role);
-      const idOfRoleName = result[indexOfSelectedRole].id;
-      param.push(idOfRoleName);
+      const roleTitle = [];
+      for (var i = 0; i < result.length; i++) {
+        roleTitle.push(result[i].title);
+      }
 
-      const sql = 'SELECT * FROM employee';
-      db.query(sql, (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-        const manager = [];
-        for (var i=0; i<result.length; i++) {
-          manager.push(result[i].first_name);
-        }
+
       inquirer.prompt([
         {
           type: 'list',
-          name: 'manager',
-          message: "Who is employee's manager ?",
-          choices: manager
+          name: 'role',
+          message: "What is the employee's role ?",
+          choices: roleTitle
         }
-      ]).then(function(answer) {
-        const indexOfSelectedManager = manager.findIndex((element) => element === answer.manager);
-        const idOfManager = result[indexOfSelectedManager].id;
-        param.push(idOfManager);
-      
-      const sql =  `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-      db.query(sql, param, (err, result) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        console.log("Successfully added!");
-        viewAllEmployees();
+      ]).then(function (answer) {
+        const indexOfSelectedRole = roleTitle.findIndex((element) => element === answer.role);
+        const idOfRoleName = result[indexOfSelectedRole].id;
+        param.push(idOfRoleName);
+
+        const sql = 'SELECT * FROM employee';
+        db.query(sql, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          const manager = [];
+          for (var i = 0; i < result.length; i++) {
+            manager.push(result[i].first_name);
+          }
+          inquirer.prompt([
+            {
+              type: 'list',
+              name: 'manager',
+              message: "Who is employee's manager ?",
+              choices: manager
+            }
+          ]).then(function (answer) {
+            const indexOfSelectedManager = manager.findIndex((element) => element === answer.manager);
+            const idOfManager = result[indexOfSelectedManager].id;
+            param.push(idOfManager);
+
+            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+            db.query(sql, param, (err, result) => {
+              if (err) {
+                console.log(err);
+                return;
+              }
+              console.log("Successfully added!");
+              viewAllEmployees();
+            })
+          })
+        })
+      })
     })
   })
-})
-})
-})
-})
 }
 
 
@@ -245,17 +245,17 @@ function removeEmployee() {
     inquirer.prompt([{
       name: 'employee',
       message: "Which employee do you want to delete?",
-  }]).then(function(answer) {
-    const sql = `DELETE FROM employee where id= ?`
-    const param = answer.employee;
-    db.query(sql, param, (err, result) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      viewAllEmployees();
+    }]).then(function (answer) {
+      const sql = `DELETE FROM employee where id= ?`
+      const param = answer.employee;
+      db.query(sql, param, (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        viewAllEmployees();
+      })
     })
-  })
   });
 }
 
@@ -269,31 +269,31 @@ function updateRole() {
       return;
     }
     const empList = [];
-    for (var i=0; i<result.length; i++) {
+    for (var i = 0; i < result.length; i++) {
       empList.push(result[i].first_name);
     }
-    
+
     inquirer.prompt([
       {
         type: 'list',
         name: 'employee',
         message: 'Which employee has a new role ?',
-        choices: empList 
+        choices: empList
       }
-    ]).then(function(answer) {
-        const indexOfSelectedEmp = empList.findIndex((element) => element === answer.employee);
-        const idOfEmp = result[indexOfSelectedEmp].id;
-        param.push(idOfEmp);
+    ]).then(function (answer) {
+      const indexOfSelectedEmp = empList.findIndex((element) => element === answer.employee);
+      const idOfEmp = result[indexOfSelectedEmp].id;
+      param.push(idOfEmp);
 
-        const sql = 'SELECT title FROM role';
-        db.query(sql, (err,result) => {
-          if (err) {
-            console.log(err);
-          }
+      const sql = 'SELECT title FROM role';
+      db.query(sql, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
         const roleList = [];
-        for (var i=0; i<result.length; i++) {
-        roleList.push(result[i].title);
-         }
+        for (var i = 0; i < result.length; i++) {
+          roleList.push(result[i].title);
+        }
         inquirer.prompt([
           {
             type: 'list',
@@ -301,20 +301,20 @@ function updateRole() {
             message: 'What is their new role ?',
             choices: roleList
           }
-        ]).then(function(answer) {
+        ]).then(function (answer) {
           const indexOfSelectedRole = roleList.findIndex((element) => element === answer.role);
           param.unshift(indexOfSelectedRole);
-      const sql = 'UPDATE employee SET role_id= ? where id = ?';
-      db.query(sql, param, (err,result) => {
-        if (err){
-          console.log(err);
-          return;
-        }
-        console.log("SUccessfully Updated!");
-        userPrompts();
+          const sql = 'UPDATE employee SET role_id= ? where id = ?';
+          db.query(sql, param, (err, result) => {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            console.log("SUccessfully Updated!");
+            userPrompts();
+          })
+        })
       })
-    })
-    })
     })
   })
 }
@@ -329,54 +329,54 @@ function updateManager() {
       return;
     }
     const empList = [];
-    for (var i=0; i<result.length; i++) {
+    for (var i = 0; i < result.length; i++) {
       empList.push(result[i].first_name);
     }
 
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'employee',
-      message: 'Which employee has a new manager?',
-      choices: empList
-    }
-  ]).then(function(answer) {
-        const indexOfSelectedEmp = empList.findIndex((element) => element === answer.employee);
-        const idOfEmp = result[indexOfSelectedEmp].id;
-        param.push(idOfEmp);
+    inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employee',
+        message: 'Which employee has a new manager?',
+        choices: empList
+      }
+    ]).then(function (answer) {
+      const indexOfSelectedEmp = empList.findIndex((element) => element === answer.employee);
+      const idOfEmp = result[indexOfSelectedEmp].id;
+      param.push(idOfEmp);
 
-        const sql = 'SELECT * FROM employee';
-        db.query(sql, (err,result) => {
-          if (err) {
-            console.log(err);
-          }
+      const sql = 'SELECT * FROM employee';
+      db.query(sql, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
         const managerList = [];
-        for (var i=0; i<result.length; i++) {
+        for (var i = 0; i < result.length; i++) {
           managerList.push(result[i].first_name);
-         }
+        }
 
-         inquirer.prompt([
+        inquirer.prompt([
           {
             type: 'list',
             name: 'manager',
             message: 'Who is their manager?',
             choices: managerList
           }
-         ]).then(function(answer) {
+        ]).then(function (answer) {
           const indexOfSelectedMAnager = empList.findIndex((element) => element === answer.manager);
           param.unshift(indexOfSelectedMAnager);
           const sql = 'UPDATE employee SET manager_id = ? where id = ?';
           db.query(sql, param, (err, result) => {
-          if (err){
-            console.log(err);
-          }
-       console.log("SUccesfully updated!");
-        userPrompts();
-       })
-     })
-   })
- })
-})
+            if (err) {
+              console.log(err);
+            }
+            console.log("SUccesfully updated!");
+            userPrompts();
+          })
+        })
+      })
+    })
+  })
 }
 
 
@@ -395,56 +395,56 @@ function viewAllRoles() {
     console.log("Showing ALL Roles \n");
     console.table(result);
     userPrompts();
-    });
+  });
 }
 
 
 function addRole() {
   inquirer.prompt([
     {
-      type: 'input', 
+      type: 'input',
       name: 'addRole',
       message: "What is the name of the role?"
     },
     {
-      type: 'input', 
+      type: 'input',
       name: 'salary',
       message: "What is the salary of this role?"
     }
-]).then(function(answers) {
-  const param = [answers.addRole, answers.salary];
-  const sql = `SELECT id,name FROM department`;
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.log(err);
-    }
-    const deptNames = [];
-    for (var i=0; i<result.length; i++) {
-      deptNames.push(result[i].name);
-    }
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'dept',
-      message: 'Select the department:',
-      choices: deptNames
-    }
-  ]).then(function(answer) {
-    const indexOfSelectedDept = deptNames.findIndex((element) => element === answer.dept);
-    const idOfDeptName = result[indexOfSelectedDept].id;
-    const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;   
-    param.push(idOfDeptName);
+  ]).then(function (answers) {
+    const param = [answers.addRole, answers.salary];
+    const sql = `SELECT id,name FROM department`;
+    db.query(sql, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      const deptNames = [];
+      for (var i = 0; i < result.length; i++) {
+        deptNames.push(result[i].name);
+      }
+      inquirer.prompt([
+        {
+          type: 'list',
+          name: 'dept',
+          message: 'Select the department:',
+          choices: deptNames
+        }
+      ]).then(function (answer) {
+        const indexOfSelectedDept = deptNames.findIndex((element) => element === answer.dept);
+        const idOfDeptName = result[indexOfSelectedDept].id;
+        const sql = `INSERT INTO role(title, salary, department_id) VALUES (?,?,?)`;
+        param.push(idOfDeptName);
 
-    db.query(sql, param, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    viewAllRoles();
-  })
-  })
-  })
-});
+        db.query(sql, param, (err, result) => {
+          if (err) {
+            console.log(err);
+            return;
+          }
+          viewAllRoles();
+        })
+      })
+    })
+  });
 }
 
 
@@ -457,9 +457,9 @@ function removeRole() {
     }
     console.table(result);
     inquirer.prompt([{
-        name: 'role',
-        message: "What role do you want to delete?",
-    }]).then(function(answer) {
+      name: 'role',
+      message: "What role do you want to delete?",
+    }]).then(function (answer) {
       const sql = `DELETE FROM role where id= ?`
       const id = answer.role;
       db.query(sql, id, (err, result) => {
@@ -470,7 +470,7 @@ function removeRole() {
         viewAllRoles();
       })
     })
-    });
+  });
 }
 
 
@@ -484,29 +484,29 @@ function viewAllDepartments() {
     console.log("Showing ALL Departments \n");
     console.table(result);
     userPrompts();
-    });
+  });
 }
 
 
 function addDepartment() {
   inquirer.prompt([
     {
-      type: 'input', 
+      type: 'input',
       name: 'addDept',
       message: "What is the name of the department?"
     }
-]).then(function(answer) {
-  const sql = `INSERT into department(name) VALUES (?)`;
-  const dept = answer.addDept;
-  db.query(sql, dept, (err, result) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log("Succesfully added Department!");
-    viewAllDepartments();
-  })
-});
+  ]).then(function (answer) {
+    const sql = `INSERT into department(name) VALUES (?)`;
+    const dept = answer.addDept;
+    db.query(sql, dept, (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.log("Succesfully added Department!");
+      viewAllDepartments();
+    })
+  });
 }
 
 
@@ -521,18 +521,18 @@ function removeDepartment() {
     inquirer.prompt([{
       name: 'department',
       message: "What department do you want to delete?",
-  }]).then(function(answer) {
-    const sql = `DELETE FROM department where id= ?`
-    const id = answer.department;
-    db.query(sql, id, (err, result) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      console.log("Succesfully deleted!");
-      viewAllDepartments();
+    }]).then(function (answer) {
+      const sql = `DELETE FROM department where id= ?`
+      const id = answer.department;
+      db.query(sql, id, (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log("Succesfully deleted!");
+        viewAllDepartments();
+      })
     })
-  })
   });
 }
 
